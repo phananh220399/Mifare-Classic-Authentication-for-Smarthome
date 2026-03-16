@@ -1,0 +1,649 @@
+#include <SPI.h>
+#include <MFRC522.h>
+#include <Servo.h>
+//==================================
+
+#include <SoftwareSerial.h>
+
+#define RX_PIN 18                         // Chân RX của EspSoftwareSerial
+#define TX_PIN 19                         // Chân TX của EspSoftwareSerial
+SoftwareSerial mySerial(RX_PIN, TX_PIN);  // RX, TX
+
+
+#define BUZZER_PIN 5
+#define FIRE_SENSOR_PIN 2
+
+#define SS_1_PIN 10
+#define SS_2_PIN 7
+#define SS_3_PIN 4
+#define RST_PIN 9
+// #define RST_PIN1 4
+//#define RST_PIN2 5
+
+MFRC522 mfrc522(SS_1_PIN, RST_PIN);
+MFRC522 mfrc522_2(SS_2_PIN, RST_PIN);
+MFRC522 mfrc522_3(SS_3_PIN, RST_PIN);
+
+MFRC522::MIFARE_Key key_authen;
+
+Servo myservo;
+Servo myservo2;
+Servo myservo3;
+
+int position;
+String data;
+String data_pass = "";
+String ss = "";
+// String assign="";
+// byte letter;
+// char symbol[12];
+//===============================================
+// const byte MaxByteArraySize = 6;
+// byte byteArray[MaxByteArraySize] = {0};
+//==================================================
+bool check = false;
+String System_All = "159753";
+String data_rcvd = "";
+//===================================================
+byte last_uid[10];
+bool last_comm_failed;
+uint32_t u32_last_cmm_mil;
+
+int count = 0;
+uint8_t last_state_fire_sensor = 0;
+// const int buzzerPin = 5;
+// const int fireSensorPin = 2;
+bool active_open_door;
+bool check_All();
+void RFID();
+void RFID2();
+void RFID3();
+//=========================================================
+// void hexCharacterStringToBytes(byte *byteArray, const char *hexString){
+//   bool oddLength = strlen(hexString) & 1;
+//   // Serial.println(strlen(hexString));
+//   // Serial.println();
+
+//   byte currentByte = 0;
+//   byte byteIndex = 0;
+
+//   for (byte charIndex = 0; charIndex < strlen(hexString); charIndex++)
+//   {
+//     bool oddCharIndex = charIndex & 1;
+
+//     if (oddLength)
+//     {
+//       // If the length is odd
+//       if (oddCharIndex)
+//       {
+//         // odd characters go in high nibble
+//         currentByte = nibble(hexString[charIndex]) << 4;
+//       }
+//       else
+//       {
+//         // Even characters go into low nibble
+//         currentByte |= nibble(hexString[charIndex]);
+//         byteArray[byteIndex++] = currentByte;
+//         currentByte = 0;
+//       }
+//     }
+//     else
+//     {
+//       // If the length is even
+//       if (!oddCharIndex)
+//       {
+//         // Odd characters go into the high nibble
+//         currentByte = nibble(hexString[charIndex]) << 4;
+//       }
+//       else
+//       {
+//         // Odd characters go into low nibble
+//         currentByte |= nibble(hexString[charIndex]);
+//         byteArray[byteIndex++] = currentByte;
+//         currentByte = 0;
+//       }
+//     }
+//   }
+
+//   // for(int i = 0; i<6; i++){
+//   //   Serial.println(byteArray[i]);
+//   // }
+// }
+
+// void dumpByteArray(const byte * byteArray, const byte arraySize){
+//   for (int i = 0; i < arraySize; i++)
+//   {
+//     Serial.print("0x");
+//     if (byteArray[i] < 0x10)
+//       Serial.print("0");
+//     Serial.print(byteArray[i], HEX);
+//     if(i == arraySize -1) break;
+//     Serial.print(", ");
+//   }
+// Serial.println();
+// }
+
+// byte nibble(char c){
+//   if (c >= '0' && c <= '9')
+//     return c - '0';
+
+//   if (c >= 'a' && c <= 'f')
+//     return c - 'a' + 10;
+
+//   if (c >= 'A' && c <= 'F')
+//     return c - 'A' + 10;
+
+//   return 0;  // Not a valid hexadecimal character
+// }
+
+void dump_byte_array(byte *buffer, byte bufferSize) {
+  String assign = "";
+  byte letter;
+  for (byte i = 0; i < bufferSize; i++) {
+    Serial.print(buffer[i] < 0x10 ? " 0" : " ");
+    Serial.print(buffer[i], HEX);
+    assign.concat(String(buffer[i] < 0x10 ? " 0" : " "));
+    assign.concat(String(buffer[i], HEX));
+  }
+  Serial.println();
+  assign.toUpperCase();
+  ss = assign.substring(1);
+  Serial.println(ss);
+  Serial.println();
+}
+
+void setup() {
+  pinMode(FIRE_SENSOR_PIN, INPUT_PULLUP);
+  /* initialize rfid */
+  Serial.begin(9600);
+  //Serial2.begin(9600, SERIAL_8N1, 16, 17);
+  mySerial.begin(9600);
+  myservo.attach(8);
+  myservo2.attach(3);
+  myservo3.attach(6);
+  while (!Serial)
+    ;
+  SPI.begin();
+  mfrc522.PCD_Init();
+  mfrc522_2.PCD_Init();
+  mfrc522_3.PCD_Init();
+
+  // pinMode(buzzerPin,OUTPUT);
+  // pinMode(fireSensorPin, INPUT);
+
+  Serial.println(F("Warning: this example overwrites the UID of your UID changeable card, use with care!"));
+  // Prepare the key (used both as key A and as key B)
+  // using FFFFFFFFFFFFh which is the default at chip delivery from the factory
+  // for (byte i = 0; i < 6; i++) {
+  //   key_authen.keyByte[i] = 0xFF;
+  // }
+  // key_authen.keyByte[0] = 0x22;
+  // key_authen.keyByte[1] = 0x23;
+  // key_authen.keyByte[2] = 0x24;
+  // key_authen.keyByte[3] = 0x25;
+  // key_authen.keyByte[4] = 0x26;
+  // key_authen.keyByte[5] = 0x27;
+}
+
+
+void loop() {
+
+    myservo.write(90);
+    myservo2.write(90);
+    myservo3.write(90);
+
+  uint8_t state_fire_sensor = digitalRead(FIRE_SENSOR_PIN);
+  if (state_fire_sensor != last_state_fire_sensor) {
+    last_state_fire_sensor = state_fire_sensor;
+    if (last_state_fire_sensor == HIGH) {
+      myservo.write(90);
+      myservo2.write(90);
+      myservo3.write(90);
+    } else {
+      myservo.write(0);
+      myservo2.write(0);
+      myservo3.write(0);
+    }
+  }
+
+
+
+  if (check_All()) {
+    Serial.println("Pass ALL ROOM");
+    Serial.println(data_rcvd);
+    Serial.println("Card on system, openning door room 1.....");
+    Serial.println("Card on system, openning door room 2.....");
+    Serial.println("Card on system, openning door room 3.....");
+    myservo.write(0);
+    myservo2.write(0);
+    myservo3.write(0);
+    delay(2000);
+    myservo.write(90);
+    myservo2.write(90);
+    myservo3.write(90);
+  }
+
+  
+  RFID();
+  RFID2();
+  RFID3();
+  //data_pass="";
+
+
+  
+}
+
+//===========================================================================
+void RFID() {
+  position = 1;
+  if (!mfrc522.PICC_IsNewCardPresent())
+    return;
+
+  // Select one of the cards
+  if (!mfrc522.PICC_ReadCardSerial())
+    return;
+
+  if (last_comm_failed) {
+    if (mfrc522.uid.uidByte[0] == last_uid[0] && mfrc522.uid.uidByte[1] == last_uid[1] && mfrc522.uid.uidByte[2] == last_uid[2] && mfrc522.uid.uidByte[3] == last_uid[3] && (millis() - u32_last_cmm_mil < 3000)) {
+      // same uid
+      return;
+    }
+  }
+
+  for (int i = 0; i < mfrc522.uid.size; i++) {
+    last_uid[i] = mfrc522.uid.uidByte[i];
+  }
+
+  // Show some details of the PICC (that is: the tag/card)
+  Serial.print(F("Card UID:"));
+  dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
+  //Serial.println(mfrc522.uid.size);
+  Serial.println();
+  Serial.print(F("PICC type: "));
+  MFRC522::PICC_Type piccType = mfrc522.PICC_GetType(mfrc522.uid.sak);
+  Serial.println(mfrc522.PICC_GetTypeName(piccType));
+
+  // Check for compatibility
+  if (piccType != MFRC522::PICC_TYPE_MIFARE_MINI && piccType != MFRC522::PICC_TYPE_MIFARE_1K && piccType != MFRC522::PICC_TYPE_MIFARE_4K) {
+    Serial.println(F("This sample only works with MIFARE Classic cards."));
+    u32_last_cmm_mil = millis();
+    return;
+  }
+  if (check_uid()) {
+
+    key_authen.keyByte[0] = 0x22;
+    key_authen.keyByte[1] = 0x23;
+    key_authen.keyByte[2] = 0x24;
+    key_authen.keyByte[3] = 0x25;
+    key_authen.keyByte[4] = 0x26;
+    key_authen.keyByte[5] = 0x27;
+
+    if (check_card_by_system_key()) {
+
+      if (check_pass() == 1) {
+        buzzerSuccess();
+        Serial.println("Card on system, openning door room 1.....");
+        myservo.write(0);
+        delay(2000);
+        myservo.write(90);
+
+        active_open_door = true;
+        last_comm_failed = false;
+      }
+    }
+  }
+
+  else if (!check_uid()) {
+
+    key_authen.keyByte[0] = 0x32;
+    key_authen.keyByte[1] = 0x33;
+    key_authen.keyByte[2] = 0x34;
+    key_authen.keyByte[3] = 0x35;
+    key_authen.keyByte[4] = 0x36;
+    key_authen.keyByte[5] = 0x37;
+
+    if (check_card_by_system_key()) {
+
+      if (check_pass() == 0) {
+        buzzerSuccess();
+        Serial.println("Card on system, openning door room 1.....");
+        myservo.write(0);
+        delay(2000);
+        myservo.write(90);
+
+        active_open_door = true;
+        last_comm_failed = false;
+      }
+    }
+  }
+
+  else {
+    last_comm_failed = true;
+  }
+
+  u32_last_cmm_mil = millis();
+
+  // Halt PICC
+  mfrc522.PICC_HaltA();
+  // Stop encryption on PCD
+  mfrc522.PCD_StopCrypto1();
+}
+
+//==============================================================================
+void RFID2() {
+
+  position = 2;
+  if (!mfrc522_2.PICC_IsNewCardPresent())
+    return;
+
+  // Select one of the cards
+  if (!mfrc522_2.PICC_ReadCardSerial())
+    return;
+
+  if (last_comm_failed) {
+    if (mfrc522_2.uid.uidByte[0] == last_uid[0] && mfrc522_2.uid.uidByte[1] == last_uid[1] && mfrc522_2.uid.uidByte[2] == last_uid[2] && mfrc522_2.uid.uidByte[3] == last_uid[3] && (millis() - u32_last_cmm_mil < 3000)) {
+      // same uid
+      return;
+    }
+  }
+
+  for (int i = 0; i < mfrc522_2.uid.size; i++) {
+    last_uid[i] = mfrc522_2.uid.uidByte[i];
+  }
+
+  // Show some details of the PICC (that is: the tag/card)
+  Serial.print(F("Card UID:"));
+  dump_byte_array(mfrc522_2.uid.uidByte, mfrc522_2.uid.size);
+  //Serial.println(mfrc522.uid.size);
+  Serial.println();
+  Serial.print(F("PICC type: "));
+  MFRC522::PICC_Type piccType = mfrc522_2.PICC_GetType(mfrc522_2.uid.sak);
+  Serial.println(mfrc522_2.PICC_GetTypeName(piccType));
+
+  // Check for compatibility
+  if (piccType != MFRC522::PICC_TYPE_MIFARE_MINI && piccType != MFRC522::PICC_TYPE_MIFARE_1K && piccType != MFRC522::PICC_TYPE_MIFARE_4K) {
+    Serial.println(F("This sample only works with MIFARE Classic cards."));
+    u32_last_cmm_mil = millis();
+    return;
+  }
+  if (check_uid()) {
+
+    key_authen.keyByte[0] = 0xAB;
+    key_authen.keyByte[1] = 0x5A;
+    key_authen.keyByte[2] = 0x7F;
+    key_authen.keyByte[3] = 0x0C;
+    key_authen.keyByte[4] = 0x9B;
+    key_authen.keyByte[5] = 0x6E;
+
+    if (check_card_by_system_key()) {
+
+      if (check_pass() == 2) {
+        buzzerSuccess();
+        Serial.println("Card on system, openning door room 2.....");
+        myservo2.write(0);
+        delay(2000);
+        myservo2.write(90);
+
+        active_open_door = true;
+        last_comm_failed = false;
+      }
+    }
+  }
+
+  else if (!check_uid()) {
+
+    key_authen.keyByte[0] = 0x32;
+    key_authen.keyByte[1] = 0x33;
+    key_authen.keyByte[2] = 0x34;
+    key_authen.keyByte[3] = 0x35;
+    key_authen.keyByte[4] = 0x36;
+    key_authen.keyByte[5] = 0x37;
+
+    if (check_card_by_system_key()) {
+
+      if (check_pass() == 0) {
+        buzzerSuccess();
+        Serial.println("Card on system, openning door room 2.....");
+        myservo2.write(0);
+        delay(2000);
+        myservo2.write(90);
+
+        active_open_door = true;
+        last_comm_failed = false;
+      }
+    }
+  }
+
+  else {
+    last_comm_failed = true;
+  }
+
+  u32_last_cmm_mil = millis();
+
+  // Halt PICC
+  mfrc522_2.PICC_HaltA();
+  // Stop encryption on PCD
+  mfrc522_2.PCD_StopCrypto1();
+}
+//==================================================================================
+void RFID3() {
+
+  position = 3;
+  if (!mfrc522_3.PICC_IsNewCardPresent())
+    return;
+
+  // Select one of the cards
+  if (!mfrc522_3.PICC_ReadCardSerial())
+    return;
+
+  if (last_comm_failed) {
+    if (mfrc522_3.uid.uidByte[0] == last_uid[0] && mfrc522_3.uid.uidByte[1] == last_uid[1] && mfrc522_3.uid.uidByte[2] == last_uid[2] && mfrc522_3.uid.uidByte[3] == last_uid[3] && (millis() - u32_last_cmm_mil < 3000)) {
+      // same uid
+      return;
+    }
+  }
+
+  for (int i = 0; i < mfrc522_3.uid.size; i++) {
+    last_uid[i] = mfrc522_3.uid.uidByte[i];
+  }
+
+  // Show some details of the PICC (that is: the tag/card)
+  Serial.print(F("Card UID:"));
+  dump_byte_array(mfrc522_3.uid.uidByte, mfrc522_3.uid.size);
+  //Serial.println(mfrc522.uid.size);
+  Serial.println();
+  Serial.print(F("PICC type: "));
+  MFRC522::PICC_Type piccType = mfrc522_3.PICC_GetType(mfrc522_3.uid.sak);
+  Serial.println(mfrc522_3.PICC_GetTypeName(piccType));
+
+  // Check for compatibility
+  if (piccType != MFRC522::PICC_TYPE_MIFARE_MINI && piccType != MFRC522::PICC_TYPE_MIFARE_1K && piccType != MFRC522::PICC_TYPE_MIFARE_4K) {
+    Serial.println(F("This sample only works with MIFARE Classic cards."));
+    u32_last_cmm_mil = millis();
+    return;
+  }
+  if (check_uid()) {
+
+    key_authen.keyByte[0] = 0x4A;
+    key_authen.keyByte[1] = 0xB3;
+    key_authen.keyByte[2] = 0xC4;
+    key_authen.keyByte[3] = 0x5C;
+    key_authen.keyByte[4] = 0xD6;
+    key_authen.keyByte[5] = 0xE3;
+
+    if (check_card_by_system_key()) {
+
+      if (check_pass() == 3) {
+        buzzerSuccess();
+        Serial.println("Card on system, openning door room 3.....");
+        myservo3.write(0);
+        delay(2000);
+        myservo3.write(90);
+
+        active_open_door = true;
+        last_comm_failed = false;
+      }
+    }
+  }
+
+  else if (!check_uid()) {
+
+    key_authen.keyByte[0] = 0x32;
+    key_authen.keyByte[1] = 0x33;
+    key_authen.keyByte[2] = 0x34;
+    key_authen.keyByte[3] = 0x35;
+    key_authen.keyByte[4] = 0x36;
+    key_authen.keyByte[5] = 0x37;
+
+    if (check_card_by_system_key()) {
+
+      if (check_pass() == 0) {
+        buzzerSuccess();
+        Serial.println("Card on system, openning door room 3.....");
+        myservo3.write(0);
+        delay(2000);
+        myservo3.write(90);
+
+        active_open_door = true;
+        last_comm_failed = false;
+      }
+    }
+  }
+
+  else {
+    last_comm_failed = true;
+  }
+
+  u32_last_cmm_mil = millis();
+
+  // Halt PICC
+  mfrc522_3.PICC_HaltA();
+  // Stop encryption on PCD
+  mfrc522_3.PCD_StopCrypto1();
+}
+
+
+bool check_card_by_system_key() {
+  // In this sample we use the second sector,
+  // that is: sector #1, covering block #4 up to and including block #7
+  //byte sector = 1;
+  //byte blockAddr = 4;
+
+  byte trailerBlock = 43;
+  MFRC522::StatusCode status;
+  byte buffer[18];
+  byte size = sizeof(buffer);
+
+  Serial.println();
+  Serial.println("check_card_by_system_key");
+
+  Serial.print(F("authen with key: "));
+  dump_byte_array(key_authen.keyByte, 6);
+  Serial.println();
+
+  // String assign="";
+  // byte letter;
+  // for(int i = 0; i < 6; i++)
+  // {
+  //   // Serial.print(key_authen.keyByte[i] < 0x10 ? " 0" : " ");
+  //   // Serial.print(key_authen.keyByte[i], HEX);
+  //   assign.concat(String(key_authen.keyByte[i]< 0x10 ? " 0" : " "));
+  //   assign.concat(String(key_authen.keyByte[i], HEX));
+  // }
+  // Serial.println();
+  // assign.toUpperCase();
+  // ss=assign.substring(1);
+  //Serial.println(ss);
+  //Serial.println();
+
+  // Serial.println(F("Authenticating using key B..."));
+  if (position == 1) {
+    status = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_B, trailerBlock, &key_authen, &(mfrc522.uid));
+    if (status != MFRC522::STATUS_OK) {
+      Serial.print(F("PCD_Authenticate() failed: "));
+      Serial.println(mfrc522.GetStatusCodeName(status));
+      return false;
+    }
+  }
+  if (position == 2) {
+    status = (MFRC522::StatusCode)mfrc522_2.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_B, trailerBlock, &key_authen, &(mfrc522_2.uid));
+    if (status != MFRC522::STATUS_OK) {
+      Serial.print(F("PCD_Authenticate() failed: "));
+      Serial.println(mfrc522_2.GetStatusCodeName(status));
+      return false;
+    }
+  }
+  if (position == 3) {
+    status = (MFRC522::StatusCode)mfrc522_3.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_B, trailerBlock, &key_authen, &(mfrc522_3.uid));
+    if (status != MFRC522::STATUS_OK) {
+      Serial.print(F("PCD_Authenticate() failed: "));
+      Serial.println(mfrc522_3.GetStatusCodeName(status));
+      return false;
+    }
+  }
+
+
+  return true;
+}
+bool check_uid() {
+  if (ss == "5E AE 04 7B" || ss == "B3 DF E7 F4") return true;
+  else if (ss == "C3 E8 56 FC" || ss == "B3 FD 00 98") return true;
+  else if (ss == "33 C3 58 95" || ss == "B3 C2 6F FB") return true;
+  else return false;
+}
+
+int check_pass() {
+  // String assign="";
+  // byte letter;
+  // for(int i = 0; i < 6; i++)
+  // {
+  //   Serial.print(key_authen.keyByte[i] < 0x10 ? " 0" : " ");
+  //   Serial.print(key_authen.keyByte[i], HEX);
+  //   assign.concat(String(key_authen.keyByte[i]< 0x10 ? " 0" : " "));
+  //   assign.concat(String(key_authen.keyByte[i], HEX));
+  // }
+  // Serial.println();
+  // assign.toUpperCase();
+  // ss=assign.substring(1);
+  // Serial.println(ss);
+  // Serial.println();
+
+  if (ss == "22 23 24 25 26 27") {
+    return 1;
+  } else if (ss == "AB 5A 7F 0C 9B 6E") {
+    return 2;
+  } else if (ss == "4A B3 C4 5C D6 E3") {
+    return 3;
+  } else if (ss == "32 33 34 35 36 37") return 0;
+
+  else Serial.println("Pass Wrong");
+}
+bool check_All() {
+  data_rcvd = mySerial.readString();
+  // Serial.println("Pass ALL ROOM");
+  Serial.println(data_rcvd);
+  String data_rcvd1 = data_rcvd.substring(0, 6);
+  if (data_rcvd == "") return false;
+  if (data_rcvd1 == System_All) {
+    //Serial.println("HELLO");
+    return true;
+  }
+  return false;
+}
+
+void buzzerSuccess() {
+  tone(BUZZER_PIN, 2300);
+  delay(100);
+  noTone(BUZZER_PIN);
+  delay(100);
+  tone(BUZZER_PIN, 2300);
+  delay(100);
+  noTone(BUZZER_PIN);
+  delay(100);
+}
+
+void buzzerFailed() {
+  tone(BUZZER_PIN, 2300);
+  delay(1000);
+  noTone(BUZZER_PIN);
+}

@@ -1,0 +1,368 @@
+#include <SPFD5408_Adafruit_GFX.h>    // Core graphics library
+#include <SPFD5408_Adafruit_TFTLCD.h> // Hardware-specific library
+#include <SPFD5408_TouchScreen.h>
+#include <SoftwareSerial.h>
+
+#define RX_PIN 18 // Chân RX của EspSoftwareSerial
+#define TX_PIN 19 // Chân TX của EspSoftwareSerial
+SoftwareSerial mySerial(RX_PIN , TX_PIN ); // RX, TX
+#include <string.h>
+/*______End of Libraries_______*/
+
+
+/*______Define LCD pins (I have asigned the default values)_______*/
+
+#define YP A1  // must be an analog pin, use "An" notation!
+
+#define XM A2  // must be an analog pin, use "An" notation!
+
+#define YM 7   // can be a digital pin
+
+#define XP 6   // can be a digital pin
+
+#define LCD_CS A3
+
+#define LCD_CD A2
+
+#define LCD_WR A1
+
+#define LCD_RD A0
+
+#define LCD_RESET A4
+
+/*_______End of defanitions______*/
+
+
+/*______Assign names to colors and pressure_______*/
+
+#define WHITE   0x0000 //Black->White
+
+#define YELLOW    0x001F //Blue->Yellow
+
+#define CYAN     0xF800 //Red->Cyan
+
+#define PINK   0x07E0 //Green-> Pink
+
+#define RED    0x07FF //Cyan -> Red
+
+#define GREEN 0xF81F //Pink -> Green 
+
+#define BLUE  0xFFE0 //Yellow->Blue
+
+#define BLACK   0xFFFF //White-> Black
+
+#define MINPRESSURE 10
+
+#define MAXPRESSURE 1000
+
+/*_______Assigned______*/
+
+
+/*____Calibrate TFT LCD_____*/
+
+#define TS_MINX 125
+
+#define TS_MINY 85
+
+#define TS_MAXX 965
+
+#define TS_MAXY 905
+
+/*______End of Calibration______*/
+
+int count = 0;
+
+TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300); //300 is the sensitivity
+
+Adafruit_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET); //Start communication with LCD
+
+
+String symbol[4][4] = {
+
+  { "7", "8", "9" },
+
+  { "4", "5", "6" },
+
+  { "1", "2", "3" },
+
+  { "C", "0", "#" }
+
+};
+
+ int X,Y;
+
+ String Number;
+
+ char action;
+
+ boolean result = false;
+
+String hide_char = "";
+ 
+
+
+void setup() {
+
+  Serial.begin(9600); //Use serial monitor for debugging
+  mySerial.begin(9600);
+  tft.reset(); //Always reset at start
+
+  tft.begin(0x9341); // My LCD uses LIL9341 Interface driver IC
+
+  tft.setRotation(2); // I just roated so that the power jack faces up - optional
+
+  tft.fillScreen(WHITE);
+
+  IntroScreen();
+
+  draw_BoxNButtons(); 
+
+}
+
+
+void loop() {
+
+  TSPoint p = waitTouch();
+  X = p.y; Y = p.x;
+
+  DetectButtons();
+
+  DisplayResult();   
+
+  delay(300);
+}
+
+
+TSPoint waitTouch() {
+
+  TSPoint p;
+
+  do {
+
+    p = ts.getPoint(); 
+
+    pinMode(XM, OUTPUT);
+
+    pinMode(YP, OUTPUT);
+
+  } while((p.z < MINPRESSURE )|| (p.z > MAXPRESSURE));
+
+  p.x = map(p.x, TS_MINX, TS_MAXX, 320, 0);/////////////////////toa do truc x
+
+  p.y = map(p.y, TS_MINY, TS_MAXY, 240, 0);;////////////toa do truc y
+
+  return p;
+}
+
+
+void DetectButtons()
+{
+  if (Y<300 && Y>210) //Detecting Buttons on Column 1
+  {
+    if (X>20 && X<60) //If cancel Button is pressed
+
+    { Number=""; 
+      
+      result=false; hide_char = "";
+      count=0;}
+     if (X>60 && X<100) //If Button 1 is pressed
+
+    {
+    hide_char.concat("*");
+    Number.concat("1");
+    //Serial.println("1");
+    count++;
+    // if (Number==0)
+
+    // Number=1;
+
+    // else
+
+    // Number = (Number*10) + 1; //Pressed twice
+
+    }
+
+
+     if (X>100 && X<140) //If Button 4 is pressed
+
+    { 
+   hide_char.concat("*");
+    Number.concat("4");
+    //Serial.println("4");
+    count++;
+    }
+
+    
+
+     if (X>140 && X<180) //If Button 7 is pressed
+    {
+    hide_char.concat("*");
+    Number.concat("7");
+    //Serial.println("7");
+    count++;
+    } 
+  }
+
+
+    if (Y<210 && Y>120) //Detecting Buttons on Column 2
+  {
+    if (X>20 && X<60)
+
+    {
+  hide_char.concat("*");
+      Number.concat("0");
+      //Serial.println("0");
+      count++;
+      }
+
+  
+     if (X>60 && X<100)
+
+    { 
+    hide_char.concat("*");
+     Number.concat("2");
+     //Serial.println("2");
+     count++;
+    }
+
+     if (X>100 && X<140)
+
+    {
+    hide_char.concat("*");
+     Number.concat("5");
+     //Serial.println("5");
+     count++;
+    }
+     if (X>140 && X<180)
+
+    {
+    hide_char.concat("*");
+     Number.concat("8");
+     //Serial.println("8");
+     count++;
+    }   
+
+  }
+    if (Y<120 && Y>30) //Detecting Buttons on Column 3
+  {
+    if (X>20 && X<60)
+
+    {
+    hide_char = ""; 
+    //Serial.println(Number);
+    if(count==6) mySerial.println(Number);
+    else if(count==1) Serial.println(Number);
+    Number = "";
+    count =0;
+    }
+     if (X>60 && X<100)
+
+    { 
+    hide_char.concat("*");
+    Number.concat("3");
+    //Serial.println("3");
+    count++;
+    }
+     if (X>100 && X<140)
+    { 
+    hide_char.concat("*");
+    Number.concat("6");
+    //Serial.println("6");
+    count++;
+    }
+     if (X>140 && X<180)
+
+    {
+    hide_char.concat("*");
+    Number.concat("9");
+    //Serial.println("9");
+    count++;
+    }   
+  }
+}
+
+void DisplayResult()
+
+{
+    tft.fillRect(0, 0, 240, 80, CYAN);  //clear result box
+    tft.setCursor(10, 20);
+    tft.setTextSize(4);
+    tft.setTextColor(BLACK);
+    tft.println(hide_char); //update new value
+}
+void IntroScreen()
+{
+  tft.setCursor (55, 120);
+  tft.setTextSize (3);
+  tft.setTextColor(RED);
+  tft.println("ARDUINO");
+  tft.setCursor (55, 160);
+  tft.println("KEYPAD");
+}
+void draw_BoxNButtons()
+{
+  //Draw the Result Box
+
+  tft.fillRect(0, 0, 240, 100, CYAN);
+
+
+ //Draw First Column
+
+  tft.fillRect  (0,260,80,60,RED);
+
+  tft.fillRect  (0,200,80,60,BLACK);
+
+  tft.fillRect  (0,140,80,60,BLACK);
+
+  tft.fillRect  (0,80,80,60,BLACK);
+
+
+ //Draw Third Column  
+
+  tft.fillRect  (160,260,80,60,GREEN);
+
+  tft.fillRect  (160,200,80,60,BLACK);
+
+  tft.fillRect  (160,140,80,60,BLACK);
+
+  tft.fillRect  (160,80,80,60,BLACK);
+
+
+  //Draw Secound & Fourth Column  
+
+  for (int b=260; b>=80; b-=60)
+ {tft.fillRect  (80,b,80,60,BLACK);}
+
+
+  //Draw Horizontal Lines
+
+  for (int h=80; h<=320; h+=60)
+
+  tft.drawFastHLine(0, h, 240, WHITE);
+
+
+  //Draw Vertical Lines
+
+  for (int v=0; v<=240; v+=80)
+
+  tft.drawFastVLine(v, 80, 240, WHITE);
+
+
+  //Display keypad lables
+
+  for (int j=0;j<4;j++) {
+
+    for (int i=0;i<4;i++) {
+
+      tft.setCursor(30 + (80*i), 100 + (60*j));
+
+      tft.setTextSize(3);
+
+      tft.setTextColor(WHITE);
+
+      tft.println(symbol[j][i]);
+
+    }
+
+  }
+}
