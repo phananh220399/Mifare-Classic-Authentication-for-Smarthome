@@ -62,7 +62,9 @@
   Access Control, change UID, Dumpinfo, Rfid_defaut_key… thư viên này khá đầy đủ cho các nhu cầu sử dụng thẻ của người dùng. 
   Trước khi sử dụng tiến hành sử dụng thẻ, hãy đảm bảo rằng kết nối từ đầu đọc tới Arduino đã được thiết lập thành công. Để tránh hư hỏng thiết bị, đầu đọc, các chân kết                    nối từ Mfrc522 tới Arduino được mô tả như bảng sau:
 <img width="794" height="599" alt="4" src="https://github.com/user-attachments/assets/660990a9-4c56-4189-8f3b-a62a2fba657d" />
+
 *2.2 Xem Thông Tin Ban Đầu Trên Một Thẻ Mới*
+
   Một thẻ mifare khi mới mua về, dữ liệu bên trong chưa bị thay đổi, các khóa bảo mật Key A, Key A đang là mặc định của nhà sản xuất. Người dùng có thể đọc thông tinh 
   trên thẻ một cách toàn vẹn mà không gặp bất kỳ một trở ngại nào. Cách đọc thông tin như sau: từ giao diện phần mềm Arduino chọn chương trình Dumpinfo trong thư viên Mfrc522, 
   tiến hành biên dịch và nạp chương trình. Sau khi tải thành công chương trình, tiến hành quẹt thẻ. Để quan sát được dữ liệu trong thẻ, chúng ta cần mở cửa sổ Serial monitor từ tab 
