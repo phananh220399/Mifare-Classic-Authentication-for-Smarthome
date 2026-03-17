@@ -43,8 +43,8 @@
       là tổ hợp các bộ ba bit điều khiển chức năng của Key A, Key B cũng như khả năng 
       được xuất hiện của dữ liệu trên thẻ
 
-      Trong đây sẽ chỉ đi sâu vào cách thức dùng key A và key B
-      Hình ảnh cấu trúc của 1 Sector Trailer và vị trí của Key A,B và Acceccbit
+  Trong đây sẽ chỉ đi sâu vào cách thức dùng key A và key B
+       Hình ảnh cấu trúc của 1 Sector Trailer và vị trí của Key A,B và Acceccbit
       
 <img width="1350" height="679" alt="2" src="https://github.com/user-attachments/assets/4de226f1-546a-4b68-adff-f734889f5831" />
 
@@ -52,7 +52,7 @@
     Hiện nay, có rất nhiều công cụ hỗ trợ lập trình thẻ Mifare và đầu đọc Mfrc522 nhưng phổ biến nhất là trình biên dich Arduino, với phiên bản kit là Uno R3. Đây cũng là công 
     cụ lập trình chính trong bài viết này. Sau khi đã cài đặt được phần mềm Arduino, bước tiếp theo là tải bộ thư viện hỗ trợ sử dụng đầu đọc Mfrc522. 
     Tại giao diện phần mềm, ta làm như sau: chọn thẻ Sketch >> Include library >> Manage libraries >> nhập vào khung tìm kiếm Mfrc522 >> chọn Install. Phần mềm sẽ tự 
-      động cập nhật bộ thư viện về máy tính của Người dùng.
+    động cập nhật bộ thư viện về máy tính của Người dùng.
 <img width="783" height="599" alt="3" src="https://github.com/user-attachments/assets/8ba0e05e-bd07-48f9-a143-5dc6861ada49" />
 
 
