@@ -49,17 +49,18 @@
 <img width="1350" height="679" alt="2" src="https://github.com/user-attachments/assets/4de226f1-546a-4b68-adff-f734889f5831" />
 
 *2.1 Các công cụ hỗ trợ và thư viện sử dụng*
-    Hiện nay, có rất nhiều công cụ hỗ trợ lập trình thẻ Mifare và đầu đọc Mfrc522 nhưng phổ biến nhất là trình biên dich Arduino, với phiên bản kit là Uno R3. Đây cũng là công 
-    cụ lập trình chính trong bài viết này. Sau khi đã cài đặt được phần mềm Arduino, bước tiếp theo là tải bộ thư viện hỗ trợ sử dụng đầu đọc Mfrc522. 
-    Tại giao diện phần mềm, ta làm như sau: chọn thẻ Sketch >> Include library >> Manage libraries >> nhập vào khung tìm kiếm Mfrc522 >> chọn Install. Phần mềm sẽ tự 
-    động cập nhật bộ thư viện về máy tính của Người dùng.
+  Hiện nay, có rất nhiều công cụ hỗ trợ lập trình thẻ Mifare và đầu đọc Mfrc522 nhưng phổ biến nhất là trình biên dich Arduino, với phiên bản kit là Uno R3. Đây cũng là công 
+  cụ lập trình chính trong bài viết này. Sau khi đã cài đặt được phần mềm Arduino, bước tiếp theo là tải bộ thư viện hỗ trợ sử dụng đầu đọc Mfrc522. 
+  Tại giao diện phần mềm, ta làm như sau: chọn thẻ Sketch >> Include library >> Manage libraries >> nhập vào khung tìm kiếm Mfrc522 >> chọn Install. Phần mềm sẽ tự 
+  động cập nhật bộ thư viện về máy tính của Người dùng.
+
 <img width="783" height="599" alt="3" src="https://github.com/user-attachments/assets/8ba0e05e-bd07-48f9-a143-5dc6861ada49" />
 
 
-    Sau khi cài đặt thành công thư viện Mfrc522, chúng ta có thể xem các chương trình trong thư viện vừa tải về. 
-    Từ giao diện phần mềm, chọn tab File >> Example >> Mfrc522 >> chọn chương trình muốn mở. các phần chương trình được tạo sẵn gồm có: 
-    Access Control, change UID, Dumpinfo, Rfid_defaut_key… thư viên này khá đầy đủ cho các nhu cầu sử dụng thẻ của người dùng. 
-    Trước khi sử dụng tiến hành sử dụng thẻ, hãy đảm bảo rằng kết nối từ đầu đọc tới Arduino đã được thiết lập thành công. Để tránh hư hỏng thiết bị, đầu đọc, các chân kết                    nối từ Mfrc522 tới Arduino được mô tả như bảng sau:
+  Sau khi cài đặt thành công thư viện Mfrc522, chúng ta có thể xem các chương trình trong thư viện vừa tải về. 
+  Từ giao diện phần mềm, chọn tab File >> Example >> Mfrc522 >> chọn chương trình muốn mở. các phần chương trình được tạo sẵn gồm có: 
+  Access Control, change UID, Dumpinfo, Rfid_defaut_key… thư viên này khá đầy đủ cho các nhu cầu sử dụng thẻ của người dùng. 
+  Trước khi sử dụng tiến hành sử dụng thẻ, hãy đảm bảo rằng kết nối từ đầu đọc tới Arduino đã được thiết lập thành công. Để tránh hư hỏng thiết bị, đầu đọc, các chân kết                    nối từ Mfrc522 tới Arduino được mô tả như bảng sau:
 <img width="794" height="599" alt="4" src="https://github.com/user-attachments/assets/660990a9-4c56-4189-8f3b-a62a2fba657d" />
 *2.2 Xem Thông Tin Ban Đầu Trên Một Thẻ Mới*
   Một thẻ mifare khi mới mua về, dữ liệu bên trong chưa bị thay đổi, các khóa bảo mật Key A, Key A đang là mặc định của nhà sản xuất. Người dùng có thể đọc thông tinh 
@@ -70,10 +71,10 @@
 <img width="1350" height="802" alt="7" src="https://github.com/user-attachments/assets/e37ecad2-08f4-466e-a0b9-a963021ca8db" />
 <img width="1350" height="710" alt="9" src="https://github.com/user-attachments/assets/93f69043-4a95-42c4-9402-ab2141561059" />
 
-    Tại đây, chúng ta có thể thấy được UID, Key A, Key B trong mỗi Trailer sector. Một lưu ý nhỏ và rất quan trọng đó là các mặc định của nhà sản xuất thì Key A không được 
-    xuất hiện trong tất cả các trường hợp. vì thế mặc dù mã bảo mật A, B mặc định là FFFFFFFFFFFF nhưng khi đọc thẻ thì chỉ mã B xuất hiện, còn mã A sẽ được trả về là dãy 
-    số 0. Điều này được đánh giá rất cao trong cơ cấu bảo mật dùng Key A, Key B. Sở dĩ chương trình Dumpinfo đọc được tất cả các dữ liệu trong thẻ vì chương trình 
-    này được người viết cài sẵn Key A, Key B mặc định, khi đọc thẻ, tất cả các Block được áp dụng hai Key này, chính vì lý do đó thẻ mới mua về thì chưa hề có bảo mật.
+  Tại đây, chúng ta có thể thấy được UID, Key A, Key B trong mỗi Trailer sector. Một lưu ý nhỏ và rất quan trọng đó là các mặc định của nhà sản xuất thì Key A không được 
+  xuất hiện trong tất cả các trường hợp. vì thế mặc dù mã bảo mật A, B mặc định là FFFFFFFFFFFF nhưng khi đọc thẻ thì chỉ mã B xuất hiện, còn mã A sẽ được trả về là dãy 
+  số 0. Điều này được đánh giá rất cao trong cơ cấu bảo mật dùng Key A, Key B. Sở dĩ chương trình Dumpinfo đọc được tất cả các dữ liệu trong thẻ vì chương trình 
+  này được người viết cài sẵn Key A, Key B mặc định, khi đọc thẻ, tất cả các Block được áp dụng hai Key này, chính vì lý do đó thẻ mới mua về thì chưa hề có bảo mật.
 *2.3 Cách sử dụng Key A,B*
   Để truy xuất thông tin trên thẻ Mifare, sau khi nhận được tính hiệu có thẻ được đưa vào, đầu đọc sẽ yêu cầu người dùng xác thực với các mã bảo mật, nếu mã bảo mật được 
   cung cấp là đúng thì sẽ trả về “True” ngược lại trả về “False”. Dựa vào các trạng thái True/False đầu đọc sẽ tiếp tục thực hiện yêu cầu hay không. Khi mã bảo mật được cung cấp là đúng,   Đọc mã xác nhận trên thẻ và tiến hành các hoạt động đọc/ghi dữ liệu. Khi một thẻ mới được mua về và chuẩn bị được sử dụng thì việc thay đổi các khóa bảo mật nên được thực hiện. ở phần    này,  chỉ tác động với Key A, Key B để thấy được rõ vai trò của chúng, nên các Access Bit nên được giữ nguyên, các Access Bit sẽ được hướng dẫn ở phần sau.Việc thay đổi Key A, Key B      được thực hiện thông qua các bước chính như sau:
