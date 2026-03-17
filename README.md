@@ -68,7 +68,8 @@
   Một thẻ mifare khi mới mua về, dữ liệu bên trong chưa bị thay đổi, các khóa bảo mật Key A, Key A đang là mặc định của nhà sản xuất. Người dùng có thể đọc thông tinh 
   trên thẻ một cách toàn vẹn mà không gặp bất kỳ một trở ngại nào. Cách đọc thông tin như sau: từ giao diện phần mềm Arduino chọn chương trình Dumpinfo trong thư viên Mfrc522, 
   tiến hành biên dịch và nạp chương trình. Sau khi tải thành công chương trình, tiến hành quẹt thẻ. Để quan sát được dữ liệu trong thẻ, chúng ta cần mở cửa sổ Serial monitor từ tab 
-  Tool trên thanh tác vụ. Dữ liệu thu được sua khi quẹt thẻ như sau: 
+  Tool trên thanh tác vụ. Dữ liệu thu được sua khi quẹt thẻ như sau:
+  
 <img width="710" height="820" alt="6" src="https://github.com/user-attachments/assets/316fd004-ae3a-4f35-80f2-342a374bde0b" />
 <img width="1350" height="802" alt="7" src="https://github.com/user-attachments/assets/e37ecad2-08f4-466e-a0b9-a963021ca8db" />
 <img width="1350" height="710" alt="9" src="https://github.com/user-attachments/assets/93f69043-4a95-42c4-9402-ab2141561059" />
